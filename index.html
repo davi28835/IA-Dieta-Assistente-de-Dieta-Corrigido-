@@ -292,7 +292,7 @@
         box.className = 'card';
         box.style.marginTop='10px';
         box.innerHTML = `<h3 style="margin:6px 0">${days[i]} — ${currentSummary.targetCalories} kcal</h3>`;
-        for(const meal of ['breakfast','lunch','dinner','snack']){
+        for(const meal of ['cafe da manha','almoço','jantar','lanche ou petisco']){
           const m = day[meal];
           const div = document.createElement('div');
           div.style.padding='8px 0';
