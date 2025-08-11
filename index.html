@@ -240,7 +240,7 @@
 
     // generate meals for a single day (breakfast, lunch, dinner, snack)
     function generateDayMeals(preference,restrictions,targetCalories){
-      const distribution = {breakfast:0.25,lunch:0.35,dinner:0.30,snack:0.10};
+      const distribution = {cafedamanha:0.25,almoço:0.35,jantar:0.30,lanche:0.10};
       const day = {};
       for(const key of Object.keys(distribution)){
         const cal = Math.round(targetCalories * distribution[key]);
@@ -353,7 +353,7 @@
     swapBtn.addEventListener('click', ()=>{
       if(!currentPlan){ alert('Gere um plano primeiro.'); return; }
       const dayIdx = Math.floor(Math.random()*7);
-      const meals = ['breakfast','lunch','dinner','snack'];
+      const meals = ['cafedamanha','almoço','jantar','lanche'];
       const meal = meals[Math.floor(Math.random()*meals.length)];
       const newFoods = pickFoodForMeal(currentSummary.preference,currentSummary.restrictions);
       currentPlan[dayIdx][meal].foods = newFoods.map(f=>({...f,servings:1}));
