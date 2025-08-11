@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" type="image/png" href="icone.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IA Dieta — Protótipo (Corrigido)</title>
+  <style>
+    :root{
+      --accent:#16a34a; --bg:#071029; --card:#071425; --muted:#9aa4b2; --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial; margin:0; background:linear-gradient(180deg,var(--bg) 0%, #04101b 100%); color:#e6eef6; -webkit-font-smoothing:antialiased;}
+
+    /* layout */
+    .wrap{max-width:1100px;margin:16px auto;padding:14px}
+    header{display:flex;align-items:center;gap:12px}
+    h1{margin:0;font-size:20px}
+    .sub{color:var(--muted);font-size:13px}
+
+    /* cards */
+    .card{background:var(--glass);border-radius:12px;padding:14px;margin-top:14px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+
+    form .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    input,select,textarea{width:100%;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+
+    .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    button{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#052018;font-weight:600;cursor:pointer}
+    .secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+    .results{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:13px}
+
+    /* meal plan */
+    #mealPlanHolder .card{padding:10px}
+    #mealPlanHolder h3{margin:6px 0}
+
+    /* chat */
+    .chat{display:flex;flex-direction:column;gap:8px;height:420px}
+    .messages{flex:1;overflow:auto;padding:8px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+    .msg{margin:6px 0;padding:8px;border-radius:10px;max-width:85%}
+    .msg.user{background:rgba(22,163,74,0.12);margin-left:auto}
+    .msg.bot{background:rgba(255,255,255,0.03)}
+    .chat-input{display:flex;gap:8px}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media(max-width:1000px){form .grid{grid-template-columns:repeat(2,1fr)}.results{grid-template-columns:1fr}.wrap{padding:10px}}
+    @media(max-width:600px){form .grid{grid-template-columns:1fr} .chat{height:320px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div style="width:52px;height:52px;border-radius:10px;background:#08323a;display:grid;place-items:center">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="#16a34a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <h1>IA Dieta — Assistente de Dieta (Corrigido)</h1>
+        <div class="sub">Mais preferências, mais restrições, responsivo e chat para perguntas.</div>
+      </div>
+    </header>
+
+    <div class="card">
+      <form id="userForm" onsubmit="return false;">
+        <div class="grid">
+          <div>
+            <label>Idade</label>
+            <input type="number" id="age" min="10" max="100" value="25">
+          </div>
+          <div>
+            <label>Sexo</label>
+            <select id="sex"><option value="male">Masculino</option><option value="female">Feminino</option></select>
+          </div>
+          <div>
+            <label>Altura (cm)</label>
+            <input type="number" id="height" min="100" max="230" value="175">
+          </div>
+          <div>
+            <label>Peso (kg)</label>
+            <input type="number" id="weight" min="30" max="300" value="75">
+          </div>
+
+          <div>
+            <label>Nível de atividade</label>
+            <select id="activity">
+              <option value="1.2">Sedentário (pouco/nenhum exercício)</option>
+              <option value="1.375">Leve (1–3 dias/semana)</option>
+              <option value="1.55" selected>Moderado (3–5 dias/semana)</option>
+              <option value="1.725">Ativo (6–7 dias/semana)</option>
+              <option value="1.9">Muito ativo (trabalho físico)</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Objetivo</label>
+            <select id="goal">
+              <option value="maintain">Manter peso</option>
+              <option value="lose">Perder peso (déficit leve)</option>
+              <option value="lose_fast">Perder rápido (não recomendado sem profissional)</option>
+              <option value="gain">Ganhar massa</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Preferência alimentar</label>
+            <select id="preference">
+              <option value="omnivore">Onívoro (padrão)</option>
+              <option value="carnivore">Carnívoro (prioriza carnes)</option>
+              <option value="pescatarian">Pescetariano (peixe + plantas)</option>
+              <option value="vegetarian">Vegetariano</option>
+              <option value="vegan">Vegano</option>
+              <option value="keto">Cetogênico (baixo carbo)</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Restrições (segure Ctrl/Cmd para múltipla seleção)</label>
+            <select id="restrictions" multiple size="4">
+              <option value="none">Nenhuma</option>
+              <option value="gluten">Glúten</option>
+              <option value="lactose">Lactose</option>
+              <option value="nuts">Oleaginosas (nozes, amêndoas)</option>
+              <option value="soy">Soja</option>
+              <option value="eggs">Ovo</option>
+              <option value="shellfish">Crustáceos / Frutos do mar</option>
+              <option value="pork">Porco</option>
+              <option value="beef">Bovinos</option>
+            </select>
+          </div>
+
+          <div style="grid-column:1/span4">
+            <label>Observações (ex.: alergias graves, preferências)</label>
+            <input id="notes" placeholder="Ex.: evito pimenta, quero aumentar proteína pela manhã" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="calcBtn">Gerar Plano</button>
+          <button class="secondary" id="resetBtn" type="button">Reset</button>
+          <button class="secondary" id="downloadBtn" type="button">Exportar JSON</button>
+        </div>
+      </form>
+
+      <div class="results" id="results" style="display:none">
+        <div class="card" style="padding:12px">
+          <h3 style="margin-top:0;margin-bottom:8px">Resumo</h3>
+          <div id="tdeeBlock"></div>
+          <div id="macroBlock" style="margin-top:8px"></div>
+          <div style="margin-top:8px"><span class="pill">Meta calórica</span> <span id="targetCalories" style="margin-left:8px;font-weight:700"></span></div>
+        </div>
+
+        <div class="card" style="padding:12px">
+          <h3 style="margin-top:0;margin-bottom:8px">Ações rápidas</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="regen">Regenerar refeições</button>
+            <button id="swap">Trocar um prato aleatório</button>
+          </div>
+          <div style="margin-top:10px;color:var(--muted);font-size:13px">Use o chat abaixo para fazer perguntas de dieta à IA.</div>
+        </div>
+      </div>
+
+      <div id="mealPlanHolder" style="display:none;margin-top:12px"></div>
+
+    <footer>Protótipo — não substitui um profissional de saúde. Use com responsabilidade.</footer>
+  </div>
+
+  <script>
+    // --- Base de dados expandida de alimentos ---
+    const FOOD_DB = [
+      {id:'oats',name:'Aveia (50g)',cal:190,p:7,c:33,f:4,veg:true,vegans:true,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'eggs',name:'Ovos (2 un)',cal:156,p:13,c:1.1,f:11,veg:false,vegans:false,gluten:false,lactose:false,soy:false,nuts:false,eggs:true,shellfish:false,pork:false,beef:false},
+      {id:'chicken',name:'Peito de frango (150g)',cal:165,p:31,c:0,f:3.6,veg:false,vegans:false,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'beef',name:'Carne bovina (150g)',cal:280,p:26,c:0,f:20,veg:false,vegans:false,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:true},
+      {id:'pork',name:'Carne de porco (150g)',cal:290,p:25,c:0,f:21,veg:false,vegans:false,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:true,beef:false},
+      {id:'fish',name:'Peixe grelhado (150g)',cal:200,p:23,c:0,f:11,veg:false,vegans:false,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'shrimp',name:'Camarão (120g)',cal:120,p:24,c:0,f:1.5,veg:false,vegans:false,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:true,pork:false,beef:false},
+      {id:'tofu',name:'Tofu (150g)',cal:144,p:16,c:3.9,f:8.7,veg:true,vegans:true,gluten:false,lactose:false,soy:true,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'rice',name:'Arroz branco (150g)',cal:205,p:4.3,c:45,f:0.4,veg:true,vegans:true,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'beans',name:'Feijão (100g)',cal:127,p:8.7,c:22.8,f:0.5,veg:true,vegans:true,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'salad',name:'Salada mista + azeite',cal:120,p:2,c:6,f:10,veg:true,vegans:true,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'bread',name:'Pão integral (2 fatias)',cal:160,p:6,c:28,f:2.5,veg:true,vegans:true,gluten:true,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'yog',name:'Iogurte natural (170g)',cal:100,p:6,c:12,f:2.5,veg:true,vegans:false,gluten:false,lactose:true,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'nuts',name:'Mix de nozes (30g)',cal:180,p:4,c:6,f:16,veg:true,vegans:true,gluten:false,lactose:false,soy:false,nuts:true,eggs:false,shellfish:false,pork:false,beef:false},
+      {id:'banana',name:'Banana (1 un)',cal:100,p:1.3,c:27,f:0.3,veg:true,vegans:true,gluten:false,lactose:false,soy:false,nuts:false,eggs:false,shellfish:false,pork:false,beef:false}
+    ];
+
+    // --- Helpers: BMR Mifflin-St Jeor ---
+    function calcBMR(sex,weight,height,age){
+      if(sex === 'male') return Math.round(10*weight + 6.25*height - 5*age + 5);
+      return Math.round(10*weight + 6.25*height - 5*age - 161);
+    }
+
+    function getGoalMultiplier(goal){
+      if(goal === 'maintain') return 0;
+      if(goal === 'lose') return -0.15;
+      if(goal === 'lose_fast') return -0.30;
+      if(goal === 'gain') return 0.15;
+      return 0;
+    }
+
+    function calcMacros(calories, preference){
+      // adapt split slightly for keto / carnivore
+      let pPerc=0.25, cPerc=0.45, fPerc=0.30;
+      if(preference === 'keto' || preference === 'carnivore'){ pPerc=0.35; cPerc=0.05; fPerc=0.60; }
+      if(preference === 'vegan' || preference === 'vegetarian'){ pPerc=0.20; cPerc=0.50; fPerc=0.30; }
+      const pCalories = calories * pPerc; const cCalories = calories * cPerc; const fCalories = calories * fPerc;
+      const protein = Math.round(pCalories / 4); const carbs = Math.round(cCalories / 4); const fats = Math.round(fCalories / 9);
+      return {protein,carbs,fats,pPerc,cPerc,fPerc};
+    }
+
+    function intersectsRestrictions(item,restrictions){
+      if(!restrictions || restrictions.length===0) return false;
+      if(restrictions.includes('none')) return false;
+      for(const r of restrictions){ if(item[r]) return true; }
+      return false;
+    }
+
+    function pickFoodForMeal(preference,restrictions){
+      // pick 2-3 items respecting preference and restrictions
+      const pool = FOOD_DB.filter(it => {
+        // preference filters
+        if(preference === 'vegetarian' && !it.veg) return false;
+        if(preference === 'vegan' && !it.vegans) return false;
+        // pescatarian: exclude common land meats (beef, chicken, pork)
+        if(preference === 'pescatarian' && (it.id === 'beef' || it.id === 'chicken' || it.id === 'pork')) return false;
+        if(preference === 'carnivore' && it.veg) return false; // only animal items
+        if(preference === 'keto' && it.id === 'rice') return false; // simple restriction for keto
+
+        if(intersectsRestrictions(it,restrictions)) return false;
+        return true;
+      });
+      const arr = pool.slice();
+      for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+      return arr.slice(0,3);
+    }
+
+    // generate meals for a single day (breakfast, lunch, dinner, snack)
+    function generateDayMeals(preference,restrictions,targetCalories){
+      const distribution = {breakfast:0.25,lunch:0.35,dinner:0.30,snack:0.10};
+      const day = {};
+      for(const key of Object.keys(distribution)){
+        const cal = Math.round(targetCalories * distribution[key]);
+        const foods = pickFoodForMeal(preference,restrictions);
+        const totalFoodCal = foods.reduce((s,f)=>s+f.cal,0) || 1;
+        const scaled = foods.map(f => ({...f,servings:Math.max(1,Math.round((cal * (f.cal/totalFoodCal))/f.cal))}));
+        day[key] = {cal,target:cal,foods:scaled};
+      }
+      return day;
+    }
+
+    function generateWeek(preference,restrictions,targetCalories){
+      const week = [];
+      for(let d=0;d<7;d++) week.push(generateDayMeals(preference,restrictions,targetCalories));
+      return week;
+    }
+
+    // UI wiring
+    const calcBtn = document.getElementById('calcBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultsDiv = document.getElementById('results');
+    const tdeeBlock = document.getElementById('tdeeBlock');
+    const macroBlock = document.getElementById('macroBlock');
+    const mealPlanHolder = document.getElementById('mealPlanHolder');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const regenBtn = document.getElementById('regen');
+    const swapBtn = document.getElementById('swap');
+
+    const messages = document.getElementById('messages');
+    const chatInput = document.getElementById('chatInput');
+    const sendChat = document.getElementById('sendChat');
+
+    let currentPlan = null;
+    let currentSummary = null;
+
+    function renderSummary(summary){
+      tdeeBlock.innerHTML = `<div><strong>BMR:</strong> ${summary.bmr} kcal — <strong>TDEE:</strong> ${summary.tdee} kcal</div>`;
+      macroBlock.innerHTML = `<div><strong>Macros (g):</strong> P ${summary.macros.protein}g • C ${summary.macros.carbs}g • F ${summary.macros.fats}g</div>`;
+      document.getElementById('targetCalories').innerText = `${summary.targetCalories} kcal`;
+      resultsDiv.style.display = 'grid';
+    }
+
+    function renderMealPlan(week){
+      mealPlanHolder.style.display = 'block';
+      mealPlanHolder.innerHTML = '';
+      const days = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+      week.forEach((day,i)=>{
+        const box = document.createElement('div');
+        box.className = 'card';
+        box.style.marginTop='10px';
+        box.innerHTML = `<h3 style="margin:6px 0">${days[i]} — ${currentSummary.targetCalories} kcal</h3>`;
+        for(const meal of ['breakfast','lunch','dinner','snack']){
+          const m = day[meal];
+          const div = document.createElement('div');
+          div.style.padding='8px 0';
+          div.innerHTML = `<strong style='text-transform:capitalize'>${meal}</strong> — ${m.target} kcal<br>` +
+                           m.foods.map(f=>`<div style='font-size:13px;margin-left:8px'>• ${f.name} x ${f.servings} (${f.cal*f.servings} kcal)</div>`).join('');
+          box.appendChild(div);
+        }
+        mealPlanHolder.appendChild(box);
+      });
+      // scroll to meal plan on small screens
+      boxScrollToTop();
+    }
+
+    function boxScrollToTop(){ window.scrollTo({top:document.getElementById('mealPlanHolder').offsetTop-20,behavior:'smooth'}); }
+
+    calcBtn.addEventListener('click', ()=>{
+      const age = Number(document.getElementById('age').value);
+      const sex = document.getElementById('sex').value;
+      const height = Number(document.getElementById('height').value);
+      const weight = Number(document.getElementById('weight').value);
+      const activity = Number(document.getElementById('activity').value);
+      const goal = document.getElementById('goal').value;
+      const preference = document.getElementById('preference').value;
+      const notes = document.getElementById('notes').value;
+      const sel = Array.from(document.getElementById('restrictions').selectedOptions).map(o=>o.value);
+      const restrictions = sel.includes('none') ? [] : sel;
+
+      if(!age || !height || !weight){ alert('Preencha idade, altura e peso.'); return; }
+
+      const bmr = calcBMR(sex,weight,height,age);
+      const tdee = Math.round(bmr * activity);
+      const adj = getGoalMultiplier(goal);
+      const targetCalories = Math.round(tdee * (1 + adj));
+      const macros = calcMacros(targetCalories, preference);
+
+      currentSummary = {age,sex,height,weight,activity,goal,preference,restrictions,notes,bmr,tdee,targetCalories,macros};
+      renderSummary({bmr,tdee,targetCalories,macros});
+      currentPlan = generateWeek(preference,restrictions,targetCalories);
+      renderMealPlan(currentPlan);
+    });
+
+    resetBtn.addEventListener('click', ()=>{ document.getElementById('userForm').reset(); resultsDiv.style.display='none'; mealPlanHolder.style.display='none'; currentPlan=null; currentSummary=null });
+
+    downloadBtn.addEventListener('click', ()=>{
+      if(!currentPlan || !currentSummary){ alert('Gere um plano primeiro.'); return; }
+      const data = {summary:currentSummary,plan:currentPlan};
+      const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'plano_dieta.json'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    regenBtn.addEventListener('click', ()=>{
+      if(!currentSummary){ alert('Gere um plano primeiro.'); return; }
+      currentPlan = generateWeek(currentSummary.preference,currentSummary.restrictions,currentSummary.targetCalories);
+      renderMealPlan(currentPlan);
+    });
+
+    swapBtn.addEventListener('click', ()=>{
+      if(!currentPlan){ alert('Gere um plano primeiro.'); return; }
+      const dayIdx = Math.floor(Math.random()*7);
+      const meals = ['breakfast','lunch','dinner','snack'];
+      const meal = meals[Math.floor(Math.random()*meals.length)];
+      const newFoods = pickFoodForMeal(currentSummary.preference,currentSummary.restrictions);
+      currentPlan[dayIdx][meal].foods = newFoods.map(f=>({...f,servings:1}));
+      renderMealPlan(currentPlan);
+    });
+
+    // --- Chat: simples NLU rule-based para protótipo ---
+    function appendMessage(text,who='bot'){
+      const div = document.createElement('div'); div.className = 'msg '+(who==='user'?'user':'bot'); div.innerText = text; messages.appendChild(div); messages.scrollTop = messages.scrollHeight; }
+
+    function answerQuestion(question){
+      const q = question.toLowerCase();
+      // simple rules
+      if(q.includes('calor') && q.includes('perder')){
+        return 'Uma regra simples: para perder ~0.5 kg/semana é preciso um déficit de cerca de 500 kcal/dia (≈3500 kcal/semana). Consulte um profissional para recomendações personalizadas.';
+      }
+      if(q.includes('prote') || q.includes('proteína')){
+        return 'Recomendação geral: 1.2–2.2 g de proteína por kg de peso corporal dependendo do objetivo (manutenção vs ganhar massa).';
+      }
+      if(q.includes('kcal') || q.includes('caloria')){
+        return 'Calorias dependem do TDEE. Use o gerador para obter seu TDEE e então ajuste conforme objetivo (défict/-15% para perda leve).';
+      }
+      if(q.includes('jejum') || q.includes('intermit')){
+        return 'O jejum intermitente pode ajudar no controle calórico para algumas pessoas, mas não é obrigatório. Verifique tolerância individual e contraindicações.';
+      }
+      if(q.includes('carboidrato') || q.includes('carbo')){
+        return 'Carboidratos fornecem energia — para perda de peso, quantidade total de calorias importa mais; para performance, ajuste carboidratos aos treinos.';
+      }
+      if(q.includes('veg') || q.includes('veget')){
+        return 'Dietas vegetarianas/veganas podem suprir necessidades nutricionais, mas preste atenção em proteína, B12, ferro e ômega‑3.';
+      }
+      if(q.includes('eu sou') || q.includes('tenho')){
+        return 'Se você mencionar idade, peso, altura e objetivo eu posso dar uma estimativa mais precisa.';
+      }
+      // fallback
+      return 'Desculpe — não tenho informação suficiente para responder com precisão. Para perguntas específicas e de alto risco, procure um nutricionista.';
+    }
+
+    sendChat.addEventListener('click', ()=>{
+      const text = chatInput.value.trim(); if(!text) return; appendMessage(text,'user'); chatInput.value='';
+      // quick simulated thinking
+      setTimeout(()=>{ const ans = answerQuestion(text); appendMessage(ans,'bot'); },500);
+    });
+    chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendChat.click(); } });
+
+  </script>
+</body>
+</html>
