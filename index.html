@@ -195,10 +195,8 @@
       {id:'couve', name:'Couve refogada (100g)', cal:40, p:3, c:7, f:0.5, veg:true, vegans:true, gluten:false, lactose:false, soy:false, nuts:false, eggs:false, shellfish:false, pork:false, beef:false},
       {id:'pamonha', name:'Pamonha (1 un média)', cal:280, p:5, c:58, f:2, veg:true, vegans:false, gluten:false, lactose:true, soy:false, nuts:false, eggs:false, shellfish:false, pork:false, beef:false},
      {id:'peixe_tambaqui', name:'Tambaqui grelhado (100g)', cal:190, p:22, c:0, f:10, veg:false, vegans:false, gluten:false, lactose:false, soy:false, nuts:false, eggs:false, shellfish:false, pork:false, beef:false},
-      {id:'feijoada', name:'Feijoada (200g)', cal:350, p:25, c:30, f:15, veg:false, vegans:false, gluten:false, lactose:false, soy:false, nuts:false, eggs:false, shellfish:false, pork:true, beef:true}
-]
-       
-
+      {id:'feijoada', name:'Feijoada (200g)', cal:350, p:25, c:30, f:15, veg:false, vegans:false, gluten:false, lactose:false, soy:false, nuts:false, eggs:false, shellfish:false, pork:true, beef:true}     
+];
     // --- Helpers: BMR Mifflin-St Jeor ---
     function calcBMR(sex,weight,height,age){
       if(sex === 'male') return Math.round(10*weight + 6.25*height - 5*age + 5);
