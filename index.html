@@ -319,30 +319,31 @@
     function boxScrollToTop(){ window.scrollTo({top:document.getElementById('mealPlanHolder').offsetTop-20,behavior:'smooth'}); }
 
     calcBtn.addEventListener('click', ()=>{
-      const age = Number(document.getElementById('age').value);
-      const sex = document.getElementById('sex').value;
-      const height = Number(document.getElementById('height').value);
-      const weight = Number(document.getElementById('weight').value);
-      const activity = Number(document.getElementById('activity').value);
-      const goal = document.getElementById('goal').value;
-      const preference = document.getElementById('preference').value;
-      const notes = document.getElementById('notes').value;
-      const sel = Array.from(document.getElementById('restrictions').selectedOptions).map(o=>o.value);
-      const restrictions = sel.includes('none') ? [] : sel;
+  const age = Number(document.getElementById('age').value);
+  const sex = document.getElementById('sex').value;
+  const height = Number(document.getElementById('height').value);
+  const weight = Number(document.getElementById('weight').value);
+  const activity = Number(document.getElementById('activity').value);
+  const goal = document.getElementById('goal').value;
+  const preference = document.getElementById('preference').value;
+  const notes = document.getElementById('notes').value;
+  const sel = Array.from(document.getElementById('restrictions').selectedOptions).map(o=>o.value);
+  let restrictions = sel.includes('none') ? [] : sel;
 
-      if(!age || !height || !weight){ alert('Preencha idade, altura e peso.'); return; }
+  if(!age || !height || !weight){ alert('Preencha idade, altura e peso.'); return; }
 
-      const bmr = calcBMR(sex,weight,height,age);
-      const tdee = Math.round(bmr * activity);
-      const adj = getGoalMultiplier(goal);
-      const targetCalories = Math.round(tdee * (1 + adj));
-      const macros = calcMacros(targetCalories, preference);
+  const bmr = calcBMR(sex,weight,height,age);
+  const tdee = Math.round(bmr * activity);
+  const adj = getGoalMultiplier(goal);
+  const targetCalories = Math.round(tdee * (1 + adj));
+  const macros = calcMacros(targetCalories, preference);
 
-      currentSummary = {age,sex,height,weight,activity,goal,preference,restrictions,notes,bmr,tdee,targetCalories,macros};
-      renderSummary({bmr,tdee,targetCalories,macros});
-      currentPlan = generateWeek(preference,restrictions,targetCalories);
-      renderMealPlan(currentPlan);
-    });
+  currentSummary = {age,sex,height,weight,activity,goal,preference,restrictions,notes,bmr,tdee,targetCalories,macros};
+  renderSummary({bmr,tdee,targetCalories,macros});
+  currentPlan = generateWeek(preference,restrictions,targetCalories);
+  renderMealPlan(currentPlan);
+});
+      
 
     resetBtn.addEventListener('click', ()=>{ document.getElementById('userForm').reset(); resultsDiv.style.display='none'; mealPlanHolder.style.display='none'; currentPlan=null; currentSummary=null });
 
