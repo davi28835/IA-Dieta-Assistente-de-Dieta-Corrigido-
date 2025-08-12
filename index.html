@@ -326,9 +326,18 @@
   const activity = Number(document.getElementById('activity').value);
   const goal = document.getElementById('goal').value;
   const preference = document.getElementById('preference').value;
-  const notes = document.getElementById('notes').value;
+
+  const notes = document.getElementById('notes').value.trim().toLowerCase();
+
+  // Restrições já selecionadas
   const sel = Array.from(document.getElementById('restrictions').selectedOptions).map(o=>o.value);
   let restrictions = sel.includes('none') ? [] : sel;
+
+  // 🔹 Lista de permitidos (se o usuário escrever algo nas observações)
+  let permitidos = [];
+  if(notes){
+    permitidos = notes.split(",").map(s => s.trim()).filter(s => s.length > 0);
+  }
 
   if(!age || !height || !weight){ alert('Preencha idade, altura e peso.'); return; }
 
@@ -338,12 +347,24 @@
   const targetCalories = Math.round(tdee * (1 + adj));
   const macros = calcMacros(targetCalories, preference);
 
-  currentSummary = {age,sex,height,weight,activity,goal,preference,restrictions,notes,bmr,tdee,targetCalories,macros};
+  currentSummary = {age,sex,height,weight,activity,goal,preference,restrictions,notes,permitidos,bmr,tdee,targetCalories,macros};
   renderSummary({bmr,tdee,targetCalories,macros});
-  currentPlan = generateWeek(preference,restrictions,targetCalories);
+
+  // 🔹 Geração do plano filtrando por permitidos
+  let plan = generateWeek(preference,restrictions,targetCalories);
+
+  if(permitidos.length > 0){
+    plan = plan.map(day => 
+      day.map(meal => 
+        permitidos.some(p => meal.name.toLowerCase().includes(p)) ? meal : null
+      ).filter(Boolean)
+    );
+  }
+
+  currentPlan = plan;
   renderMealPlan(currentPlan);
 });
-      
+    
 
     resetBtn.addEventListener('click', ()=>{ document.getElementById('userForm').reset(); resultsDiv.style.display='none'; mealPlanHolder.style.display='none'; currentPlan=null; currentSummary=null });
 
